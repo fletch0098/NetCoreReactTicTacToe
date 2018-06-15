@@ -31,6 +31,11 @@ namespace NetCoreReactTicTacToe.Hubs
 
             Clients.All.SendAsync("sendToAll", NewMessage.Timestamp, NewMessage.Name, NewMessage.MessageText);
         }
+
+        public void sendMove(string i)
+        {
+            Clients.All.SendAsync("sendMove", i);
+        }
         public void newChatUser(string name)
         {
             int NumberOfPlayers = ctx.Player.Count();
