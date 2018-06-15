@@ -1,74 +1,127 @@
 ﻿import React, { Component } from 'react';
 import * as signalR from '@aspnet/signalr';
 
+import { Col, Grid, Row } from 'react-bootstrap';
+
 export class Chat extends Component {
 
     constructor(props) {
         super(props);
 
+        //const url = 'https://netcorereacttictactoebrian.azurewebsites.net/chathub';
+        //const url = 'http://localhost:58656/chathub';
+
         this.state = {
-            nick: '',
             message: '',
-            messages: [],
-            hubConnection: null,
-            url: '',
         };
     }
 
-    componentDidMount = () => {
-        const nick = window.prompt('Your name:', 'John');
+    //componentDidMount = () => {
+    //    const name = window.prompt('Your name:', 'Player 1');
 
-        //const Url = 'https://netcorereacttictactoebrian.azurewebsites.net/chathub';
-        const Url = 'http://localhost:58656/chathub';
+    //    const hubConnection = new signalR.HubConnectionBuilder()
+    //        .withUrl(this.state.url)
+    //        .configureLogging(signalR.LogLevel.Information)
+    //        .build();
 
-        const hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl(Url)
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
-        hubConnection.start().catch(err => console.error(err.toString()));
+    //    this.setState({ hubConnection, name }, () => {
+    //        this.state.hubConnection
+    //            .start()
+    //            .then(() => {
+    //                //Now that we started the connection
+    //                console.log('Connection started!')
+    //                this.newChatUser(name)
+    //            })
+    //            .catch(err => console.log('Error while establishing connection :('));
 
-        this.setState({ hubConnection, nick }, () => {
-            this.state.hubConnection
-                .start()
-                .then(() => console.log('Connection started!'))
-                .catch(err => console.log('Error while establishing connection :('));
-
-            this.state.hubConnection.on('sendToAll', (nick, receivedMessage) => {
-                const text = `${nick}: ${receivedMessage}`;
-                const messages = this.state.messages.concat([text]);
-                this.setState({ messages });
-            });
-        });
-
-
-    }
+    //        this.state.hubConnection
+    //            .on('sendToAll', (time,name, receivedMessage) => {
+    //                const text = `${Moment(time).format('DD/MM/YY:h:mm:ss a')}: ${name}: ${receivedMessage}`;
+    //                const messages = this.state.messages.concat([text]);
+    //                this.setState({ messages });
+    //            });
+    //        this.state.hubConnection
+    //            .on('loadNewPlayer', (player) => {
+    //                console.log('New Player: ' + player);
+    //                const text = `${player.playerName}: ${player.playerXorO}`;
+    //                const players = this.state.players.concat([text]);
+    //                this.setState({ players });
+    //            });
+    //        this.state.hubConnection
+    //            .on('chatFull', (receivedMessage) => {
+    //                window.alert(receivedMessage);
+    //            });
+    //        this.state.hubConnection
+    //            .on('playerDisconnected', (receivedMessage) => {
+    //                window.alert(receivedMessage);
+    //            });
+    //        this.state.hubConnection
+    //            .on('catchUpNewPlayer', (messagesList, playerList) => {
+    //                console.log('PlayerList' + playerList);
+    //                playerList.map((player, index) => (
+    //                    this.setState({ players: this.state.players.concat([`${player.playerName}: ${player.playerXorO}`]) })
+    //                ));
+    //                console.log('Message List' + messagesList);
+    //                messagesList.map((message, index) => (
+    //                    this.setState({ messages: this.state.messages.concat([`${Moment(message.timestamp).format('DD/MM/YY:h:mm:ss a')}: ${message.name}: ${message.messageText}`]) })
+    //                ));
+    //            });
+    //    });
+    //}
 
     sendMessage = () => {
-        this.state.hubConnection
-            .invoke('sendToAll', this.state.nick, this.state.message)
-            .catch(err => console.error(err));
+        this.props.sendMessage(this.state.message)
+        //this.state.hubConnection
+        //    .invoke('sendToAll', this.state.name, this.state.message)
+        //    .catch(err => console.error(err));
 
         this.setState({ message: '' });
     };
 
+
+
     render() {
         return (
+                
             <div className='Chat'>
-                <br />
-                <input
-                    type="text"
-                    value={this.state.message}
-                    onChange={e => this.setState({ message: e.target.value })}
-                />
+                <row>
+                    <Col sm={4}>
+                        <div className='players'>
+                            <h3>Players online:</h3>
+                            <ul className='chat-users'>
+                                {this.props.players.map((player, index) => (
+                                    <li key={index}>{player}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </Col>
+                    <Col sm={8}>
+                        <div className=''>
+                            <h3>Messages:</h3>
+                            <input
+                                type="text"
+                                value={this.state.message}
+                                onChange={e => this.setState({ message: e.target.value })}
+                            />
 
-                <button onClick={this.sendMessage}>Send</button>
+                            <button onClick={this.sendMessage}>Send</button>
 
-                <div>
-                    {this.state.messages.map((message, index) => (
-                        <span style={{ display: 'block' }} key={index}> {message} </span>
-                    ))}
-                </div>
+                            <div className='messages'>
+                                
+                                {this.props.messages.map((message, index) => (
+                                    <span style={{ display: 'block' }} key={index}> {message} </span>
+                                ))}
+                            </div>
+                        </div>
+                    </Col>
+                </row>
+                
+                
+                
+
+                
             </div>
         );
     }
+
 }

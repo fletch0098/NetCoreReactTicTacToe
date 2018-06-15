@@ -4,106 +4,140 @@ import './TicTacToe.css';
 import { Game } from './Game';
 import { HighScore } from './HighScore';
 import { Players } from './Players';
+import { Chat } from '../Chat/Chat';
 import * as signalR from '@aspnet/signalr';
+import Moment from 'moment';
 
 export class TicTacToe extends Component {
     displayName = TicTacToe.name
 
     constructor(props) {
         super(props);
+
+        //const url = 'https://netcorereacttictactoebrian.azurewebsites.net/chathub';
+        const url = 'http://localhost:58656/chathub';
+
         this.state = {
             games: [],
-            initials: '',
-            player: '',
+            name: '',
+            message: '',
+            messages: [],
             players: [],
             hubConnection: null,
-      };
+            url: url,
+        };
+
         this.addGame = this.addGame.bind(this);
     }
 
     componentDidMount = () => {
-        //console.log('players: ' + this.state.players);
-        //console.log('players length: ' + this.state.players.length);
-        if (this.state.players.length < 2) {
-            const initials = window.prompt('Your Initials:', 'P1');
 
-            //const Url = 'https://netcorereacttictactoebrian.azurewebsites.net/tictactoehub';
-            const Url = 'http://localhost:58656/tictactoehub';
+        const name = window.prompt('Your name:', 'Player 1');
 
-            const hubConnection = new signalR.HubConnectionBuilder()
-                .withUrl(Url)
-                .configureLogging(signalR.LogLevel.Information)
-                .build();
+        const hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(this.state.url)
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
 
-            hubConnection.start().catch(err => console.error(err.toString()));
+        this.setState({ hubConnection, name }, () => {
+            this.state.hubConnection
+                .start()
+                .then(() => {
+                    //Now that we started the connection
+                    console.log('Connection started!')
+                    this.newChatUser(name)
+                })
+                .catch(err => console.log('Error while establishing connection :('));
 
-            this.setState({ hubConnection, initials }, () => {
-                this.state.hubConnection
-                    .start()
-                    .then(() => console.log('Connection started!'))
-                    .catch(err => console.log('Error while establishing connection :('));
-
-                this.state.hubConnection.on('NewPlayer', (initials, player) => {
-                    const text = `${initials}: ${player}`;
+            this.state.hubConnection
+                .on('sendToAll', (time, name, receivedMessage) => {
+                    const text = `${Moment(time).format('DD/MM/YY:h:mm:ss a')}: ${name}: ${receivedMessage}`;
+                    const messages = this.state.messages.concat([text]);
+                    this.setState({ messages });
+                });
+            this.state.hubConnection
+                .on('loadNewPlayer', (player) => {
+                    console.log('New Player: ' + player);
+                    const text = `${player.playerName}: ${player.playerXorO}`;
                     const players = this.state.players.concat([text]);
                     this.setState({ players });
                 });
-            });
-
-            //console.log('componentDidMount - State: '+ this.state);
-
-            this.newPlayer(initials);
-        }
-        else {
-            window.alert('Already 2 players, please refresh and try again');
-        }
+            this.state.hubConnection
+                .on('chatFull', (receivedMessage) => {
+                    window.alert(receivedMessage);
+                });
+            this.state.hubConnection
+                .on('playerDisconnected', (receivedMessage) => {
+                    window.alert(receivedMessage);
+                });
+            this.state.hubConnection
+                .on('catchUpNewPlayer', (messagesList, playerList) => {
+                    console.log('PlayerList' + playerList);
+                    playerList.map((player, index) => (
+                        this.setState({ players: this.state.players.concat([`${player.playerName}: ${player.playerXorO}`]) })
+                    ));
+                    console.log('Message List' + messagesList);
+                    messagesList.map((message, index) => (
+                        this.setState({ messages: this.state.messages.concat([`${Moment(message.timestamp).format('DD/MM/YY:h:mm:ss a')}: ${message.name}: ${message.messageText}`]) })
+                    ));
+                });
+        });
     }
 
-    newPlayer(initials) { 
+    newPlayer = (initials) => {
         //console.log('NewPlayer: Initials '  + initials);
+        let player = null;
+
         if (this.state.players.length) {
             //console.log('NewPlayer: Player O');
-            this.setState({
-                player: 'O'
-            });
+                player = 'O'
         }
         else {
             //console.log('NewPlayer: Player X');
-            this.setState({
-                player: 'X'
-            });
+                player = 'X'
         }
 
-        //console.log('NewPlayer: player ' + this.state.player);
-
         this.state.hubConnection
-            .invoke('NewPlayer', initials, this.state.player)
+            .invoke('NewPlayer', initials, player)
             .catch(err => console.error(err));
     }
 
-    render() {
-      return (
-          <div className='TicTacToe'>
-              <h1>TicTacToe</h1>
-              <p>This is a simple tictactoe game.</p>
-              <Grid fluid>
-                  <Row>
-                      <Col sm={3}>
-                          <Game addGame={game => this.addGame(game)} />
-                      </Col>
-                      <Col sm={3}>
-                          <Players players={this.state.players} />
-                      </Col>
-                  </Row>
-              </Grid>
+    newChatUser = (name) => {
+        this.state.hubConnection
+            .invoke('newChatUser', name)
+            .catch(err => console.error(err));
+    };
 
-              <button onClick={(initials) => this.newPlayer('BMF')} >NewPlayer</button>
-              <HighScore games={this.state.games} newGame={() => this.newGame()} />
-          </div>
-        );
-    }
+    sendMessage = (msg) => {
+        this.state.hubConnection
+            .invoke('sendToAll', this.state.name, msg)
+            .catch(err => console.error(err));
+
+        //this.setState({ message: '' });
+    };
 
     addGame(game) {
         this.setState({ games: [...this.state.games, game] });
+    }
+
+    render() {
+        return (
+            <div className='TicTacToe'>
+                <Row>
+                    <Col sm={4}>
+                        <h1>TicTacToe</h1>
+                        <p>This is a simple tictactoe game.</p>
+                        <Game addGame={game => this.addGame(game)} />
+                     </Col>
+                    <Col sm={8}>
+                        <Chat players={this.state.players} messages={this.state.messages} sendMessage={(msg) => this.sendMessage(msg)} />
+                     </Col>
+                </Row>
+                <Row>
+                <button onClick={(initials) => this.newPlayer('BMF')} >NewPlayer</button>
+                    <HighScore games={this.state.games} newGame={() => this.newGame()} />
+                </Row>
+            </div>
+        );
     }
 }

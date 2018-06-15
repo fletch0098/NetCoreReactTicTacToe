@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using NetCoreReactTicTacToe.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 namespace NetCoreReactTicTacToe
 {
@@ -26,7 +27,15 @@ namespace NetCoreReactTicTacToe
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc().AddSessionStateTempDataProvider(); ;
+
+            //services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+            services.AddSession();
+            services.AddMemoryCache();
+            services.AddDbContext<TicTactoeDbContext>(opt => opt.UseInMemoryDatabase("TicTactoeDb"));
+
+            // Adds a default in-memory implementation of IDistributedCache.
+            services.AddDistributedMemoryCache();
 
             services.AddCors(options =>
             {
@@ -150,6 +159,7 @@ namespace NetCoreReactTicTacToe
 
 
             app.UseStaticFiles();
+            app.UseSession();
             app.UseSpaStaticFiles();
 
             app.UseCors("CorsPolicyLocal");

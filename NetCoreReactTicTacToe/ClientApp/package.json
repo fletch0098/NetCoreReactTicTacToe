@@ -5,6 +5,7 @@
   "dependencies": {
     "@aspnet/signalr": "^1.0.0",
     "bootstrap": "^3.3.7",
+    "moment": "^2.22.2",
     "react": "^16.0.0",
     "react-bootstrap": "^0.31.5",
     "react-dom": "^16.0.0",

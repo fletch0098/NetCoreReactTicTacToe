@@ -17,7 +17,6 @@ export default class App extends Component {
         <Route path='/counter' component={Counter} />
         <Route path='/fetchdata' component={FetchData} />
             <Route path='/tictactoe' component={TicTacToe} />
-            <Route path='/chat' component={Chat} />
             
       </Layout>
     );
