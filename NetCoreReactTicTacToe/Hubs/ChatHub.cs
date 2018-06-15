@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace NetCoreWebSocketServer.Hubs
+namespace NetCoreReactTicTacToe.Hubs
 {
     public class ChatHub : Hub
     {

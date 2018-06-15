@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreReactTicTacToe", "NetCoreReactTicTacToe\NetCoreReactTicTacToe.csproj", "{05CBD0BA-A271-4F46-A2A2-6F07EBFDFB5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetCoreWebSocketServer", "NetCoreWebSocketServer\NetCoreWebSocketServer.csproj", "{7F6EA8A7-C417-4973-A080-FA062D136006}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{05CBD0BA-A271-4F46-A2A2-6F07EBFDFB5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05CBD0BA-A271-4F46-A2A2-6F07EBFDFB5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05CBD0BA-A271-4F46-A2A2-6F07EBFDFB5F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F6EA8A7-C417-4973-A080-FA062D136006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F6EA8A7-C417-4973-A080-FA062D136006}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F6EA8A7-C417-4973-A080-FA062D136006}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F6EA8A7-C417-4973-A080-FA062D136006}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

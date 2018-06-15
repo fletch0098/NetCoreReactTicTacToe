@@ -7,13 +7,16 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace NetCoreReactTicTacToe.Hubs
 {
-    public class TicTacToeHub: Hub
+    public class TicTacToeHub : Hub
     {
-        public void AddMessage(string message)
+        public void SendToAll(string player, int row, int col)
         {
-            var chatMessage = new object[2];
-            // Call the MessageAdded method to update clients.
-            Clients.All.SendCoreAsync("MessageAdded", chatMessage);
+            Clients.All.SendAsync("sendToAll", player, row, col);
+        }
+
+        public void NewPlayer(string PlayerName, string Player)
+        {
+            Clients.All.SendAsync("NewPlayer", PlayerName, Player);
         }
     }
 }

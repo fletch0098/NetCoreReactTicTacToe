@@ -38,6 +38,11 @@ export class NavMenu extends Component {
                     <Glyphicon glyph='th-list' /> TicTacToe
                 </NavItem>
             </LinkContainer>
+                    <LinkContainer to={'/chat'}>
+                        <NavItem>
+                            <Glyphicon glyph='th-list' /> Chat
+                </NavItem>
+                    </LinkContainer>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

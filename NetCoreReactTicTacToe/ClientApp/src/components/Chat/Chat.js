@@ -1,7 +1,7 @@
 ﻿import React, { Component } from 'react';
-import { HubConnection } from '@aspnet/signalr-client';
+import * as signalR from '@aspnet/signalr';
 
-class Chat extends Component {
+export class Chat extends Component {
 
     constructor(props) {
         super(props);
@@ -11,13 +11,21 @@ class Chat extends Component {
             message: '',
             messages: [],
             hubConnection: null,
+            url: '',
         };
     }
 
     componentDidMount = () => {
         const nick = window.prompt('Your name:', 'John');
 
-        const hubConnection = new HubConnection('http://localhost:5000/chat');
+        //const Url = 'https://netcorereacttictactoebrian.azurewebsites.net/chathub';
+        const Url = 'http://localhost:58656/chathub';
+
+        const hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(Url)
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+        hubConnection.start().catch(err => console.error(err.toString()));
 
         this.setState({ hubConnection, nick }, () => {
             this.state.hubConnection
@@ -31,6 +39,8 @@ class Chat extends Component {
                 this.setState({ messages });
             });
         });
+
+
     }
 
     sendMessage = () => {
@@ -43,7 +53,7 @@ class Chat extends Component {
 
     render() {
         return (
-            <div>
+            <div className='Chat'>
                 <br />
                 <input
                     type="text"
@@ -62,5 +72,3 @@ class Chat extends Component {
         );
     }
 }
-
-export default Chat;

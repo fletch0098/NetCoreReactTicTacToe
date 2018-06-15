@@ -10,7 +10,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.SpaServices.Webpack;
-//using NetCoreReactTicTacToe.Services;
+using NetCoreReactTicTacToe.Hubs;
 
 namespace NetCoreReactTicTacToe
 {
@@ -27,8 +27,107 @@ namespace NetCoreReactTicTacToe
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddCors(options =>
+            {
+                // BEGIN01
+                options.AddPolicy("AllowSpecificOrigins",
+                builder =>
+                {
+                    builder.WithOrigins("http://172.19.21.7:3000", "http://localhost:3000");
+                });
+                // END01
+
+                // BEGIN02
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                    });
+                // END02
+
+                // BEGIN03
+                options.AddPolicy("AllowSpecificMethods",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .WithMethods("GET", "POST", "HEAD");
+                    });
+                // END03
+
+                // BEGIN04
+                options.AddPolicy("AllowAllMethods",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .AllowAnyMethod();
+                    });
+                // END04
+
+                // BEGIN05
+                options.AddPolicy("AllowHeaders",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .WithHeaders("accept", "content-type", "origin", "x-custom-header");
+                    });
+                // END05
+
+                // BEGIN06
+                options.AddPolicy("AllowAllHeaders",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .AllowAnyHeader();
+                    });
+                // END06
+
+                // BEGIN07
+                options.AddPolicy("ExposeResponseHeaders",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .WithExposedHeaders("x-custom-header");
+                    });
+                // END07
+
+                // BEGIN08
+                options.AddPolicy("AllowCredentials",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .AllowCredentials();
+                    });
+                // END08
+
+                // BEGIN09
+                options.AddPolicy("SetPreflightExpiration",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://172.19.21.7:3000")
+                               .SetPreflightMaxAge(TimeSpan.FromSeconds(2520));
+                    });
+                // END09
+                options.AddPolicy("LocalDev",
+                    policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
+                options.AddPolicy("CorsPolicyLocal",
+            builder =>
+            {
+                builder.AllowAnyMethod().AllowAnyHeader()
+                       .WithOrigins("http://172.19.21.7:3000/")
+                       .AllowCredentials();
+            });
+                options.AddPolicy("CorsPolicyNetwork",
+            builder =>
+            {
+                builder.AllowAnyMethod().AllowAnyHeader()
+                       .WithOrigins("http://172.19.21.7:3000")
+                       .AllowCredentials();
+            });
+            });
+
             services.AddSignalR();
-            //services.AddSingleton<IChatService, ChatService>();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -52,6 +151,14 @@ namespace NetCoreReactTicTacToe
 
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseCors("CorsPolicyLocal");
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chathub");
+                routes.MapHub<TicTacToeHub>("/tictactoehub");
+            });
 
             app.UseMvc(routes =>
             {

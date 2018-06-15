@@ -19,10 +19,10 @@ export class Players extends Component {
     return (
             <div className='players'>
                 <h3>Players online:</h3>
-                <ul className='chat-users'>
-                    {this.state.users.map(user =>
-                        <li key={user.player}>{user.initials}</li>
-                    )}
+            <ul className='chat-users'>
+                {this.props.players.map((player, index) => (
+                    <li key={index}>{player}</li>
+                ))}
                 </ul>
             </div>
     );
